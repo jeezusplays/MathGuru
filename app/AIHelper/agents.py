@@ -9,6 +9,8 @@ from .settings import OPENAI_API_KEY
 gpt35 = OpenAIChat(openai_api_key=OPENAI_API_KEY,temperature=0, model="gpt-3.5-turbo-0613")
 gpt4 = OpenAIChat(openai_api_key=OPENAI_API_KEY,temperature=0, model="gpt-4-0613")
 
+
+# Text to questions agent
 template1 = """
 Role:
 You are a primary school math expert that can filter and segment the questions from OCR scanned text
@@ -28,6 +30,7 @@ chain1 = LLMChain(
     output_key="question_list"
 )
 
+# Metadata Agent
 template2 = """
 Role:
 You are a primary school math expert that extracts the topics, and difficulty of the question given the primary school level
@@ -52,8 +55,32 @@ chain2 = LLMChain(
     output_key="question_metadata"
 )
 
+# Regenerate question agent ===== TODO =====
+template3 = """
+Role:
+You are a primary school math expert that extracts the topics, and difficulty of the question given the primary school level
+Task:
+For the question: {question_text}, identify and provide the following metadata in the given structure:
+{{
+   "level": "{primary_level}",
+   "topics": "[<<topics here>>]" (list[string]) ,
+   "difficulty": "<<One of 'Very Easy', 'Easy', 'Medium', 'Hard', 'Very Hard'>>"
+}}
+A: <<response in JSON format>>
+"""
 
-#WE CANT STITCH IT TGT LIKE THIS, WE HAVE TO SPLIT IT BY A LOOP
+prompt3 = PromptTemplate(
+    input_variables=["question_text","primary_level"],
+    template=template3                     
+)
+
+chain3 = LLMChain(
+    llm=gpt4,
+    prompt=prompt3,
+    output_key="question_metadata"
+)
+# Regenerate question agent ===== TODO =====
+
 
 get_questions = SequentialChain(
     chains=[chain1],
@@ -69,3 +96,10 @@ get_metadata = SequentialChain(
     verbose=True
 )
 
+# TODO
+generate_question = SequentialChain(
+    chains=[chain2],
+    input_variables=["question_text","primary_level"],
+    output_variables=["question_metadata"],
+    verbose=True
+)
