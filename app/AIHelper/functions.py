@@ -53,6 +53,7 @@ def _getNewQuestion(question_dict):
             "new_question":new_question
         }
 
+# Consider multi treading
 def generateQuestions(questions_dict_list:list):
     """
     Generate new question from a list of scanned question
@@ -84,6 +85,7 @@ def generateQuestions(questions_dict_list:list):
     """
     
     return map(_getNewQuestion,questions_dict_list)
+
 
 
 if __name__ == "__main__":

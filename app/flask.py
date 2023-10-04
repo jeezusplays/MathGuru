@@ -12,7 +12,7 @@ PORT = os.getenv('FLASK_PORT')
 print(PORT)
 
 
-
+# TODO
 @app.route('/parse/questions',methods = ["POST"])
 def getReading():
     # Convert the request data to JSON (assuming it's sent as JSON)
@@ -25,6 +25,7 @@ def getReading():
 
     return jsonify({"message": "Data received successfully!"}),200
 
+# TODO
 @app.route('/generate/questions',methods = ["GET"])
 def getReading():
     # Convert the request data to JSON (assuming it's sent as JSON)

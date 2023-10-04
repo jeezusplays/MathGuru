@@ -27,5 +27,6 @@ def saveEmbedding():
 def delEmbedding():
     pass
 
+# May not be needed - For future improvements
 def searchQuestions(topics:list[str],question_text:str,k:int):
     pass
