@@ -13,10 +13,21 @@ gpt4 = OpenAIChat(openai_api_key=OPENAI_API_KEY,temperature=0, model="gpt-4-0613
 # Text to questions agent
 template1 = """
 Role:
-You are a primary school math expert that can filter and segment the questions from OCR scanned text
+You are a primary school math expert with advanced filtering capabilities.
+
+OCR scanned text:
+{ocr_text}
+
 Task:
-From the given OCR scanned text: {ocr_text}, extract all the relevant questions and associated text into a list of lists (list[list[string]]).
-{{ "questions": <<list here>> }}
+Process the following OCR scanned text. Your goal is to identify, segment, and list all the math-related questions that are complete and solvable with the given text alone. Exclude any questions that refer to figures, diagrams, or require additional information not included in the text. Organize the extracted questions into a structured format.
+
+Constraints:
+- Omit any questions that involve visual aids such as charts, tables, or pictures since these cannot be processed through text alone.
+- Ensure each question is listed separately and includes all the information required to be answered.
+- Exclude any text that does not constitute a math-related question suitable for primary school level.
+
+Return strictly in this JSON format:
+{{ "questions": list[list[string]] }}
 """
 
 prompt1 = PromptTemplate(
@@ -41,19 +52,37 @@ get_questions = SequentialChain(
 # Metadata Agent
 template2 = """
 Role:
-You are a primary school math expert that extracts the topics, and difficulty of the question given the primary school level
-Data:
+You are an intelligent agent with specialization in primary school mathematics, tasked with evaluating math questions for their completeness and educational attributes.
+
+Task:
+Review each math question and determine its characteristics based on the provided primary school level. Your main goal is to generate a metadata report that states the level, the topics covered, the sufficiency of context for the question to be answerable, and the difficulty level.
+
+Data Input:
 {{
-    "questions": {question_text},
+    "question": "{question_text}",
     "primary_level": {primary_level}
 }}
-Task:
-, identify and provide the following metadata in the given structure:
+
+Required Metadata Output:
+Create a metadata summary using the structure shown below. The summary should accurately reflect the academic level, enumerate the covered math topics, assess the completeness of the question's context, and categorize the difficulty level.
+
+Metadata Output Format:
 {{
-   "level": {primary_level} (int),
-   "topics": "[<<topics here>>]" (list[string]) ,
-   "difficulty": "<<One of 'Very Easy', 'Easy', 'Medium', 'Hard', 'Very Hard'>>"
+   "level": {primary_level},
+   "topics": list[string],
+   "enoughContext": bool,
+   "difficulty": string ('Very Easy', 'Easy', 'Medium', 'Hard', 'Very Hard')
 }}
+
+Detailed Instructions for "enoughContext":
+- A question has "enoughContext" (true) if it includes all necessary measurements, figures, diagrams, or data needed to reach an answer.
+- If the question is missing any crucial element such as measurements for calculating volume, specific angles for geometry problems, or explicit diagrams where they are required for understanding, then "enoughContext" should be marked as false.
+- Pay close attention to the language of the question. If it implies the need for additional information that is not provided in the text (like the need to reference a diagram that is not described or included), it does not have enough context.
+- Questions that are open-ended without specific numerical or factual data required for a primary school math question should also be marked as lacking enough context.
+
+Note:
+- The determination of "enoughContext" is critical. It ensures the question is directly answerable from the information provided in the text. This should be a binary assessment—either all necessary information is present (true), or it is not (false).
+- For any question marked with "enoughContext": false, include a brief explanation stating what crucial information is missing.
 """
 
 prompt2 = PromptTemplate(

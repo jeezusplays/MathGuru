@@ -11,6 +11,7 @@ def textToQuestions(text_list,level:int):
             "ocr_question": list["Original question"],
             "metadata" : {
                             "level": 5,
+                            "enoughContext": bool,
                             "topics": ["Word Problems", "Multiplication", "Division"],
                             "difficulty": "Medium"
                          }
@@ -31,7 +32,7 @@ def textToQuestions(text_list,level:int):
         meta = meta['question_metadata']
         question_dict_list.append({
             "ocr_question":question_list,
-            "metadata":meta
+            "metadata":json.loads(meta)
         })
 
     return question_dict_list
@@ -39,7 +40,8 @@ def textToQuestions(text_list,level:int):
 def _getNewQuestion(question_dict):
         question_list = question_dict['ocr_question']
         meta = question_dict['metadata']
-
+        if not meta.get("enoughContext", False):
+             return None
         new_question = generate_question({
             "question_text":question_list,
             "question_metadata":meta
@@ -64,6 +66,7 @@ def generateQuestions(questions_dict_list:list):
             "ocr_question": list["Original question"],
             "metadata" : {
                             "level": 5,
+                            "enoughContext": bool,
                             "topics": ["Word Problems", "Multiplication", "Division"],
                             "difficulty": "Medium"
                          }
@@ -84,7 +87,7 @@ def generateQuestions(questions_dict_list:list):
     ]
     """
     
-    return map(_getNewQuestion,questions_dict_list)
+    return list(map(_getNewQuestion,questions_dict_list))
 
 
 

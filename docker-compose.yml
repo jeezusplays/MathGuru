@@ -1,1 +1,10 @@
-# TODO
+version: '3.8'
+
+services:
+  ai:
+    build: ./app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/usr/src/app
+    # command: flask run --host=0.0.0.0
